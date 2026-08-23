@@ -52,7 +52,7 @@ export interface Category {
   icon: string; // emoji
   color: string; // css var name suffix or hex-free token
   purposes: string[];
-  emailAccountId?: ID;
+  emailAccountId?: ID | undefined;
 }
 
 export interface EmailAccount {
@@ -72,19 +72,19 @@ export interface Prospect {
   company: string;
   contactName: string;
   email: string;
-  phone?: string;
-  website?: string;
-  industry?: string;
+  phone?: string | undefined;
+  website?: string | undefined;
+  industry?: string | undefined;
   country: string;
   city: string;
   categoryId: ID;
   tags: string[];
-  notes?: string;
+  notes?: string | undefined;
   status: LeadStatus;
   createdAt: string;
-  lastContactedAt?: string | null;
-  lastResponseAt?: string | null;
-  nextFollowUpAt?: string | null;
+  lastContactedAt?: string | null | undefined;
+  lastResponseAt?: string | null | undefined;
+  nextFollowUpAt?: string | null | undefined;
 }
 
 export type CampaignStatus = "draft" | "scheduled" | "sending" | "paused" | "completed" | "cancelled";
@@ -94,7 +94,7 @@ export interface Campaign {
   name: string;
   categoryId: ID;
   purpose: string;
-  description?: string;
+  description?: string | undefined;
   emailAccountId: ID;
   subject: string;
   body: string;
@@ -102,7 +102,7 @@ export interface Campaign {
   createdAt: string;
   batchSize: number;
   intervalMinutes: number;
-  scheduledAt?: string | null;
+  scheduledAt?: string | null | undefined;
 }
 
 export type RecipientState =
@@ -119,14 +119,14 @@ export interface CampaignRecipient {
   campaignId: ID;
   prospectId: ID;
   state: RecipientState;
-  sentAt?: string | null;
-  openedAt?: string | null;
+  sentAt?: string | null | undefined;
+  openedAt?: string | null | undefined;
   openCount: number;
-  repliedAt?: string | null;
-  followUpAt?: string | null;
-  outcome?: Extract<LeadStatus, "interested" | "meeting" | "negotiating" | "won" | "lost" | "not_interested"> | null;
-  subject?: string;
-  body?: string;
+  repliedAt?: string | null | undefined;
+  followUpAt?: string | null | undefined;
+  outcome?: Extract<LeadStatus, "interested" | "meeting" | "negotiating" | "won" | "lost" | "not_interested"> | null | undefined;
+  subject?: string | undefined;
+  body?: string | undefined;
 }
 
 export interface Template {
@@ -149,7 +149,7 @@ export interface FollowUp {
   step: number;
   dueAt: string;
   status: FollowUpStatus;
-  note?: string;
+  note?: string | undefined;
 }
 
 export type ActivityType =
@@ -172,10 +172,10 @@ export interface Activity {
   type: ActivityType;
   at: string;
   title: string;
-  detail?: string;
-  prospectId?: ID;
-  campaignId?: ID;
-  categoryId?: ID;
+  detail?: string | undefined;
+  prospectId?: ID | undefined;
+  campaignId?: ID | undefined;
+  categoryId?: ID | undefined;
 }
 
 export interface WorkspaceState {
