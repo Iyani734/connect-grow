@@ -181,7 +181,7 @@ export function buildDemoState(): WorkspaceState {
 
   const prospects: Prospect[] = seeds.map((s, i) => {
     const [company, contactName, email, industry, country, city, categoryId] = s;
-    const status = statusPool[Math.floor(r() * statusPool.length)];
+    const status = statusPool[Math.floor(r() * statusPool.length)]!;
     const contacted = status !== "new";
     const lastContactedAt = contacted ? daysAgo(Math.floor(r() * 40) + 1) : null;
     const responded = ["replied", "interested", "meeting", "negotiating", "won"].includes(status);
@@ -196,7 +196,7 @@ export function buildDemoState(): WorkspaceState {
       country,
       city,
       categoryId,
-      tags: r() > 0.5 ? [tagPool[Math.floor(r() * tagPool.length)]] : [],
+      tags: r() > 0.5 ? [tagPool[Math.floor(r() * tagPool.length)]!] : [],
       notes: i % 5 === 0 ? "Met at the East Africa travel expo. Interested in Q4 planning." : undefined,
       status,
       createdAt: daysAgo(Math.floor(r() * 120) + 40),
@@ -384,7 +384,7 @@ Ian`,
         followUpAt: sent && !repliedAt && r() > 0.55 ? inDays(Math.floor(r() * 10) - 4) : null,
         outcome:
           repliedAt && ["interested", "meeting", "negotiating", "won", "lost"].includes(prospect.status)
-            ? (prospect.status as CampaignRecipient["outcome"])
+            ? (prospect.status as NonNullable<CampaignRecipient["outcome"]>)
             : null,
         subject: campaign.subject,
         body: campaign.body,
@@ -484,7 +484,7 @@ Ian`,
       name: "School Trip Introduction",
       categoryId: "cat-schools",
       subject: "School trip programme for {{company_name}} — 2026 season",
-      body: campaigns[0].body,
+      body: campaigns[0]!.body,
       timesUsed: 182,
       replyRate: 14.8,
       won: 7,
@@ -494,7 +494,7 @@ Ian`,
       name: "Hotel Rate Request",
       categoryId: "cat-tour",
       subject: "Contracted agent rates — {{company_name}}",
-      body: campaigns[1].body,
+      body: campaigns[1]!.body,
       timesUsed: 126,
       replyRate: 18.2,
       won: 5,
@@ -504,7 +504,7 @@ Ian`,
       name: "Corporate Retreat Pitch",
       categoryId: "cat-corporate",
       subject: "Team retreat ideas for {{company_name}}",
-      body: campaigns[2].body,
+      body: campaigns[2]!.body,
       timesUsed: 94,
       replyRate: 9.6,
       won: 2,
@@ -514,7 +514,7 @@ Ian`,
       name: "Website Teardown Offer",
       categoryId: "cat-software",
       subject: "A faster website for {{company_name}}",
-      body: campaigns[3].body,
+      body: campaigns[3]!.body,
       timesUsed: 151,
       replyRate: 12.4,
       won: 4,
