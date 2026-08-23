@@ -107,8 +107,6 @@ export function OutreachProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = React.useMemo<StoreValue>(() => {
-    const findProspect = (id: ID) => state.prospects.find((p) => p.id === id);
-
     return {
       ...state,
       ready,
@@ -367,8 +365,6 @@ export function OutreachProvider({ children }: { children: React.ReactNode }) {
         const fresh = buildDemoState();
         setState(fresh);
       },
-      // keep unused helper referenced for type-completeness
-      ...(findProspect ? {} : {}),
     };
   }, [state, ready, mutate, logActivity]);
 
