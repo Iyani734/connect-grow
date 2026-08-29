@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FollowUpsRouteImport } from './routes/follow-ups'
+import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
+import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$campaignId'
+import { Route as CampaignsNewRouteImport } from './routes/campaigns.new'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsProspectIdRouteImport } from './routes/prospects.$prospectId'
 
@@ -19,9 +23,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FollowUpsRoute = FollowUpsRouteImport.update({
+  id: '/follow-ups',
+  path: '/follow-ups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
   id: '/campaigns/',
   path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsCampaignIdRoute = CampaignsCampaignIdRouteImport.update({
+  id: '/campaigns/$campaignId',
+  path: '/campaigns/$campaignId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsNewRoute = CampaignsNewRouteImport.update({
+  id: '/campaigns/new',
+  path: '/campaigns/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
@@ -37,12 +61,20 @@ const ProspectsProspectIdRoute = ProspectsProspectIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/follow-ups': typeof FollowUpsRoute
+  '/templates': typeof TemplatesRoute
+  '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
+  '/campaigns/new': typeof CampaignsNewRoute
   '/prospects/$prospectId': typeof ProspectsProspectIdRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/follow-ups': typeof FollowUpsRoute
+  '/templates': typeof TemplatesRoute
+  '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
+  '/campaigns/new': typeof CampaignsNewRoute
   '/prospects/$prospectId': typeof ProspectsProspectIdRoute
   '/campaigns': typeof CampaignsIndexRoute
   '/prospects': typeof ProspectsIndexRoute
@@ -50,21 +82,53 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/follow-ups': typeof FollowUpsRoute
+  '/templates': typeof TemplatesRoute
+  '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
+  '/campaigns/new': typeof CampaignsNewRoute
   '/prospects/$prospectId': typeof ProspectsProspectIdRoute
   '/campaigns/': typeof CampaignsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/prospects/$prospectId' | '/campaigns/' | '/prospects/'
+  fullPaths:
+    | '/'
+    | '/follow-ups'
+    | '/templates'
+    | '/campaigns/$campaignId'
+    | '/campaigns/new'
+    | '/prospects/$prospectId'
+    | '/campaigns/'
+    | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/prospects/$prospectId' | '/campaigns' | '/prospects'
+  to:
+    | '/'
+    | '/follow-ups'
+    | '/templates'
+    | '/campaigns/$campaignId'
+    | '/campaigns/new'
+    | '/prospects/$prospectId'
+    | '/campaigns'
+    | '/prospects'
   id:
-    '__root__' | '/' | '/prospects/$prospectId' | '/campaigns/' | '/prospects/'
+    | '__root__'
+    | '/'
+    | '/follow-ups'
+    | '/templates'
+    | '/campaigns/$campaignId'
+    | '/campaigns/new'
+    | '/prospects/$prospectId'
+    | '/campaigns/'
+    | '/prospects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FollowUpsRoute: typeof FollowUpsRoute
+  TemplatesRoute: typeof TemplatesRoute
+  CampaignsCampaignIdRoute: typeof CampaignsCampaignIdRoute
+  CampaignsNewRoute: typeof CampaignsNewRoute
   ProspectsProspectIdRoute: typeof ProspectsProspectIdRoute
   CampaignsIndexRoute: typeof CampaignsIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
@@ -79,11 +143,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/follow-ups': {
+      id: '/follow-ups'
+      path: '/follow-ups'
+      fullPath: '/follow-ups'
+      preLoaderRoute: typeof FollowUpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/campaigns/': {
       id: '/campaigns/'
       path: '/campaigns'
       fullPath: '/campaigns/'
       preLoaderRoute: typeof CampaignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/$campaignId': {
+      id: '/campaigns/$campaignId'
+      path: '/campaigns/$campaignId'
+      fullPath: '/campaigns/$campaignId'
+      preLoaderRoute: typeof CampaignsCampaignIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/new': {
+      id: '/campaigns/new'
+      path: '/campaigns/new'
+      fullPath: '/campaigns/new'
+      preLoaderRoute: typeof CampaignsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prospects/': {
@@ -105,6 +197,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FollowUpsRoute: FollowUpsRoute,
+  TemplatesRoute: TemplatesRoute,
+  CampaignsCampaignIdRoute: CampaignsCampaignIdRoute,
+  CampaignsNewRoute: CampaignsNewRoute,
   ProspectsProspectIdRoute: ProspectsProspectIdRoute,
   CampaignsIndexRoute: CampaignsIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
