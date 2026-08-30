@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountsRouteImport } from './routes/accounts'
+import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as FollowUpsRouteImport } from './routes/follow-ups'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 import { Route as CampaignsCampaignIdRouteImport } from './routes/campaigns.$campaignId'
@@ -30,6 +32,11 @@ const AccountsRoute = AccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActivityRoute = ActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -38,6 +45,11 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
 const FollowUpsRoute = FollowUpsRouteImport.update({
   id: '/follow-ups',
   path: '/follow-ups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesRoute = TemplatesRouteImport.update({
@@ -74,8 +86,10 @@ const ProspectsProspectIdRoute = ProspectsProspectIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/activity': typeof ActivityRoute
   '/analytics': typeof AnalyticsRoute
   '/follow-ups': typeof FollowUpsRoute
+  '/import': typeof ImportRoute
   '/templates': typeof TemplatesRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/campaigns/new': typeof CampaignsNewRoute
@@ -86,8 +100,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/activity': typeof ActivityRoute
   '/analytics': typeof AnalyticsRoute
   '/follow-ups': typeof FollowUpsRoute
+  '/import': typeof ImportRoute
   '/templates': typeof TemplatesRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/campaigns/new': typeof CampaignsNewRoute
@@ -99,8 +115,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/activity': typeof ActivityRoute
   '/analytics': typeof AnalyticsRoute
   '/follow-ups': typeof FollowUpsRoute
+  '/import': typeof ImportRoute
   '/templates': typeof TemplatesRoute
   '/campaigns/$campaignId': typeof CampaignsCampaignIdRoute
   '/campaigns/new': typeof CampaignsNewRoute
@@ -113,8 +131,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accounts'
+    | '/activity'
     | '/analytics'
     | '/follow-ups'
+    | '/import'
     | '/templates'
     | '/campaigns/$campaignId'
     | '/campaigns/new'
@@ -125,8 +145,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accounts'
+    | '/activity'
     | '/analytics'
     | '/follow-ups'
+    | '/import'
     | '/templates'
     | '/campaigns/$campaignId'
     | '/campaigns/new'
@@ -137,8 +159,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accounts'
+    | '/activity'
     | '/analytics'
     | '/follow-ups'
+    | '/import'
     | '/templates'
     | '/campaigns/$campaignId'
     | '/campaigns/new'
@@ -150,8 +174,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountsRoute: typeof AccountsRoute
+  ActivityRoute: typeof ActivityRoute
   AnalyticsRoute: typeof AnalyticsRoute
   FollowUpsRoute: typeof FollowUpsRoute
+  ImportRoute: typeof ImportRoute
   TemplatesRoute: typeof TemplatesRoute
   CampaignsCampaignIdRoute: typeof CampaignsCampaignIdRoute
   CampaignsNewRoute: typeof CampaignsNewRoute
@@ -176,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/activity': {
+      id: '/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -188,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/follow-ups'
       fullPath: '/follow-ups'
       preLoaderRoute: typeof FollowUpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates': {
@@ -238,8 +278,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountsRoute: AccountsRoute,
+  ActivityRoute: ActivityRoute,
   AnalyticsRoute: AnalyticsRoute,
   FollowUpsRoute: FollowUpsRoute,
+  ImportRoute: ImportRoute,
   TemplatesRoute: TemplatesRoute,
   CampaignsCampaignIdRoute: CampaignsCampaignIdRoute,
   CampaignsNewRoute: CampaignsNewRoute,
