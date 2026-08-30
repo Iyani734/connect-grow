@@ -133,7 +133,10 @@ function TemplatesPage() {
             </Button>
             <Button
               onClick={() => {
-                if (!form.name.trim()) return toast.error("Give the template a name");
+                if (!form.name.trim()) {
+                  toast.error("Give the template a name");
+                  return;
+                }
                 store.saveTemplate(form);
                 toast.success("Template saved");
                 setOpen(false);
