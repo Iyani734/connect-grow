@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/prospects/$prospectId")({
 });
 
 function ProspectProfile() {
-  const { prospectId } = useParams({ from: "/prospects/$prospectId" });
+  const { prospectId } = useParams({ from: "/_authenticated/prospects/$prospectId" });
   const store = useOutreach();
   const lookups = useLookups();
   const prospect = store.prospects.find((p) => p.id === prospectId);

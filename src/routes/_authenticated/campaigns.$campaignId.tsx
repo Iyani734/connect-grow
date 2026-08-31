@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/campaigns/$campaignId")({
 });
 
 function CampaignDetail() {
-  const { campaignId } = useParams({ from: "/campaigns/$campaignId" });
+  const { campaignId } = useParams({ from: "/_authenticated/campaigns/$campaignId" });
   const store = useOutreach();
   const lookups = useLookups();
   const campaign = store.campaigns.find((c) => c.id === campaignId);
