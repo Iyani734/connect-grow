@@ -7,7 +7,7 @@ import { formatDate, formatShort, pct } from "@/lib/outreach/format";
 import { CategoryChip, EmptyState, Pill, ProgressBar, SectionCard, StatusBadge } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/campaigns/$campaignId")({
+export const Route = createFileRoute("/_authenticated/_authenticated/campaigns/$campaignId")({
   head: () => ({
     meta: [
       { title: "Campaign detail — OutreachOS" },

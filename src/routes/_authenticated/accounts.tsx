@@ -7,9 +7,9 @@ import { relative } from "@/lib/outreach/format";
 import { CategoryChip, PageHeader, Pill, ProgressBar, SectionCard } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Field } from "@/routes/prospects.index";
+import { Field } from "@/routes/_authenticated/prospects.index";
 
-export const Route = createFileRoute("/accounts")({
+export const Route = createFileRoute("/_authenticated/_authenticated/accounts")({
   head: () => ({
     meta: [
       { title: "Email Accounts — OutreachOS" },

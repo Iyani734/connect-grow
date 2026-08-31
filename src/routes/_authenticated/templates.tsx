@@ -7,7 +7,7 @@ import { CategoryChip, PageHeader, SectionCard } from "@/components/app/primitiv
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Field } from "@/routes/prospects.index";
+import { Field } from "@/routes/_authenticated/prospects.index";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/templates")({
+export const Route = createFileRoute("/_authenticated/_authenticated/templates")({
   head: () => ({
     meta: [
       { title: "Templates — OutreachOS" },

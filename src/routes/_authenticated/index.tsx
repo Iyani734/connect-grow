@@ -25,7 +25,7 @@ import { formatShort, pct, relative } from "@/lib/outreach/format";
 import { CategoryChip, KpiCard, ProgressBar, SectionCard } from "@/components/app/primitives";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Overview — OutreachOS" },
