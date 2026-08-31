@@ -17,7 +17,7 @@ import { pct } from "@/lib/outreach/format";
 import { PageHeader, SectionCard } from "@/components/app/primitives";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/analytics")({
+export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
     meta: [
       { title: "Analytics — OutreachOS" },

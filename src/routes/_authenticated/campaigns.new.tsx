@@ -4,7 +4,7 @@ import { AlertTriangle, Check, ChevronLeft, ChevronRight, Send, Sparkles } from 
 import { toast } from "sonner";
 import { useOutreach } from "@/lib/outreach/store";
 import { applyVariables, firstName, formatDate } from "@/lib/outreach/format";
-import { Field } from "@/routes/prospects.index";
+import { Field } from "@/routes/_authenticated/prospects.index";
 import { CategoryChip, PageHeader, Pill, SectionCard, StatusBadge } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { CampaignRecipient } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/campaigns/new")({
+export const Route = createFileRoute("/_authenticated/campaigns/new")({
   head: () => ({
     meta: [
       { title: "New campaign — OutreachOS" },

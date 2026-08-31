@@ -8,7 +8,7 @@ import { CategoryChip, PageHeader, Pill, ProgressBar, SectionCard } from "@/comp
 import { Button } from "@/components/ui/button";
 import type { CampaignStatus } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/campaigns/")({
+export const Route = createFileRoute("/_authenticated/campaigns/")({
   head: () => ({
     meta: [
       { title: "Campaigns — OutreachOS" },

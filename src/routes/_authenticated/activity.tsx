@@ -14,10 +14,10 @@ import { useOutreach } from "@/lib/outreach/store";
 import { formatDate, relative } from "@/lib/outreach/format";
 import { EmptyState, PageHeader, SectionCard } from "@/components/app/primitives";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/routes/prospects.index";
+import { Select } from "@/routes/_authenticated/prospects.index";
 import type { ActivityType } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/activity")({
+export const Route = createFileRoute("/_authenticated/activity")({
   head: () => ({
     meta: [
       { title: "Activity — OutreachOS" },

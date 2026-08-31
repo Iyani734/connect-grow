@@ -6,9 +6,9 @@ import { useOutreach } from "@/lib/outreach/store";
 import { PageHeader, Pill, SectionCard } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Field } from "@/routes/prospects.index";
+import { Field } from "@/routes/_authenticated/prospects.index";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — OutreachOS" },

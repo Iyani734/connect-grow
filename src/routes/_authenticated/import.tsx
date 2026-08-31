@@ -6,9 +6,9 @@ import { useOutreach } from "@/lib/outreach/store";
 import { EmptyState, PageHeader, Pill, SectionCard } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Field } from "@/routes/prospects.index";
+import { Field } from "@/routes/_authenticated/prospects.index";
 
-export const Route = createFileRoute("/import")({
+export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
       { title: "Import prospects — OutreachOS" },

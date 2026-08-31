@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export const Route = createFileRoute("/prospects/$prospectId")({
+export const Route = createFileRoute("/_authenticated/prospects/$prospectId")({
   head: () => ({
     meta: [
       { title: "Prospect profile — OutreachOS" },
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/prospects/$prospectId")({
 });
 
 function ProspectProfile() {
-  const { prospectId } = useParams({ from: "/prospects/$prospectId" });
+  const { prospectId } = useParams({ from: "/_authenticated/prospects/$prospectId" });
   const store = useOutreach();
   const lookups = useLookups();
   const prospect = store.prospects.find((p) => p.id === prospectId);
