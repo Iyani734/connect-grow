@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { FollowUp } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/follow-ups")({
+export const Route = createFileRoute("/_authenticated/follow-ups")({
   head: () => ({
     meta: [
       { title: "Follow-ups — OutreachOS" },

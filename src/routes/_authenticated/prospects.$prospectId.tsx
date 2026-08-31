@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/prospects/$prospectId")({
+export const Route = createFileRoute("/_authenticated/prospects/$prospectId")({
   head: () => ({
     meta: [
       { title: "Prospect profile — OutreachOS" },

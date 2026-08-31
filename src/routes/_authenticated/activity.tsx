@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/routes/_authenticated/prospects.index";
 import type { ActivityType } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/activity")({
+export const Route = createFileRoute("/_authenticated/activity")({
   head: () => ({
     meta: [
       { title: "Activity — OutreachOS" },

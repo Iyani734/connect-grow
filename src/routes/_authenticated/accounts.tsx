@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/routes/_authenticated/prospects.index";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/accounts")({
+export const Route = createFileRoute("/_authenticated/accounts")({
   head: () => ({
     meta: [
       { title: "Email Accounts — OutreachOS" },

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/prospects/")({
+export const Route = createFileRoute("/_authenticated/prospects/")({
   head: () => ({
     meta: [
       { title: "Prospects — OutreachOS" },

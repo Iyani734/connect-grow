@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "@/routes/_authenticated/prospects.index";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/import")({
+export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
       { title: "Import prospects — OutreachOS" },

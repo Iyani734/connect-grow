@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { CampaignRecipient } from "@/lib/outreach/types";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/campaigns/new")({
+export const Route = createFileRoute("/_authenticated/campaigns/new")({
   head: () => ({
     meta: [
       { title: "New campaign — OutreachOS" },

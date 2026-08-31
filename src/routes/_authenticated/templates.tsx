@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/_authenticated/_authenticated/templates")({
+export const Route = createFileRoute("/_authenticated/templates")({
   head: () => ({
     meta: [
       { title: "Templates — OutreachOS" },
