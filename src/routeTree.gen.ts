@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated/accounts'
 import { Route as AuthenticatedActivityRouteImport } from './routes/_authenticated/activity'
@@ -23,78 +25,89 @@ import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedProspectsIndexRouteImport } from './routes/_authenticated/prospects.index'
 import { Route as AuthenticatedProspectsProspectIdRouteImport } from './routes/_authenticated/prospects.$prospectId'
 
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/_authenticated/',
-  path: '/',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
-  id: '/_authenticated/accounts',
+  id: '/accounts',
   path: '/accounts',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedActivityRoute = AuthenticatedActivityRouteImport.update({
-  id: '/_authenticated/activity',
+  id: '/activity',
   path: '/activity',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
-  id: '/_authenticated/analytics',
+  id: '/analytics',
   path: '/analytics',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFollowUpsRoute = AuthenticatedFollowUpsRouteImport.update({
-  id: '/_authenticated/follow-ups',
+  id: '/follow-ups',
   path: '/follow-ups',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
-  id: '/_authenticated/import',
+  id: '/import',
   path: '/import',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/_authenticated/settings',
+  id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
-  id: '/_authenticated/templates',
+  id: '/templates',
   path: '/templates',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCampaignsIndexRoute =
   AuthenticatedCampaignsIndexRouteImport.update({
-    id: '/_authenticated/campaigns/',
+    id: '/campaigns/',
     path: '/campaigns/',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCampaignsCampaignIdRoute =
   AuthenticatedCampaignsCampaignIdRouteImport.update({
-    id: '/_authenticated/campaigns/$campaignId',
+    id: '/campaigns/$campaignId',
     path: '/campaigns/$campaignId',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCampaignsNewRoute =
   AuthenticatedCampaignsNewRouteImport.update({
-    id: '/_authenticated/campaigns/new',
+    id: '/campaigns/new',
     path: '/campaigns/new',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedProspectsIndexRoute =
   AuthenticatedProspectsIndexRouteImport.update({
-    id: '/_authenticated/prospects/',
+    id: '/prospects/',
     path: '/prospects/',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedProspectsProspectIdRoute =
   AuthenticatedProspectsProspectIdRouteImport.update({
-    id: '/_authenticated/prospects/$prospectId',
+    id: '/prospects/$prospectId',
     path: '/prospects/$prospectId',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -102,7 +115,6 @@ export interface FileRoutesByFullPath {
   '/import': typeof AuthenticatedImportRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/templates': typeof AuthenticatedTemplatesRoute
-  '/': typeof AuthenticatedIndexRoute
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/prospects/$prospectId': typeof AuthenticatedProspectsProspectIdRoute
@@ -110,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/prospects/': typeof AuthenticatedProspectsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRoute
   '/accounts': typeof AuthenticatedAccountsRoute
   '/activity': typeof AuthenticatedActivityRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -126,6 +139,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/activity': typeof AuthenticatedActivityRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -143,6 +158,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
+    | '/auth'
     | '/accounts'
     | '/activity'
     | '/analytics'
@@ -150,7 +167,6 @@ export interface FileRouteTypes {
     | '/import'
     | '/settings'
     | '/templates'
-    | '/'
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/prospects/$prospectId'
@@ -158,6 +174,7 @@ export interface FileRouteTypes {
     | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/auth'
     | '/accounts'
     | '/activity'
     | '/analytics'
@@ -173,6 +190,8 @@ export interface FileRouteTypes {
     | '/prospects'
   id:
     | '__root__'
+    | '/_authenticated'
+    | '/auth'
     | '/_authenticated/accounts'
     | '/_authenticated/activity'
     | '/_authenticated/analytics'
@@ -189,6 +208,121 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/accounts': {
+      id: '/_authenticated/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AuthenticatedAccountsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/activity': {
+      id: '/_authenticated/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof AuthenticatedActivityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/follow-ups': {
+      id: '/_authenticated/follow-ups'
+      path: '/follow-ups'
+      fullPath: '/follow-ups'
+      preLoaderRoute: typeof AuthenticatedFollowUpsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/import': {
+      id: '/_authenticated/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof AuthenticatedImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/templates': {
+      id: '/_authenticated/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/campaigns/': {
+      id: '/_authenticated/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof AuthenticatedCampaignsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/campaigns/$campaignId': {
+      id: '/_authenticated/campaigns/$campaignId'
+      path: '/campaigns/$campaignId'
+      fullPath: '/campaigns/$campaignId'
+      preLoaderRoute: typeof AuthenticatedCampaignsCampaignIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/campaigns/new': {
+      id: '/_authenticated/campaigns/new'
+      path: '/campaigns/new'
+      fullPath: '/campaigns/new'
+      preLoaderRoute: typeof AuthenticatedCampaignsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/prospects/': {
+      id: '/_authenticated/prospects/'
+      path: '/prospects'
+      fullPath: '/prospects/'
+      preLoaderRoute: typeof AuthenticatedProspectsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/prospects/$prospectId': {
+      id: '/_authenticated/prospects/$prospectId'
+      path: '/prospects/$prospectId'
+      fullPath: '/prospects/$prospectId'
+      preLoaderRoute: typeof AuthenticatedProspectsProspectIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+  }
+}
+
+interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedActivityRoute: typeof AuthenticatedActivityRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
@@ -204,103 +338,7 @@ export interface RootRouteChildren {
   AuthenticatedProspectsIndexRoute: typeof AuthenticatedProspectsIndexRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/accounts': {
-      id: '/_authenticated/accounts'
-      path: '/accounts'
-      fullPath: '/accounts'
-      preLoaderRoute: typeof AuthenticatedAccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/activity': {
-      id: '/_authenticated/activity'
-      path: '/activity'
-      fullPath: '/activity'
-      preLoaderRoute: typeof AuthenticatedActivityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/analytics': {
-      id: '/_authenticated/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/follow-ups': {
-      id: '/_authenticated/follow-ups'
-      path: '/follow-ups'
-      fullPath: '/follow-ups'
-      preLoaderRoute: typeof AuthenticatedFollowUpsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/import': {
-      id: '/_authenticated/import'
-      path: '/import'
-      fullPath: '/import'
-      preLoaderRoute: typeof AuthenticatedImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/templates': {
-      id: '/_authenticated/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/campaigns/': {
-      id: '/_authenticated/campaigns/'
-      path: '/campaigns'
-      fullPath: '/campaigns/'
-      preLoaderRoute: typeof AuthenticatedCampaignsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/campaigns/$campaignId': {
-      id: '/_authenticated/campaigns/$campaignId'
-      path: '/campaigns/$campaignId'
-      fullPath: '/campaigns/$campaignId'
-      preLoaderRoute: typeof AuthenticatedCampaignsCampaignIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/campaigns/new': {
-      id: '/_authenticated/campaigns/new'
-      path: '/campaigns/new'
-      fullPath: '/campaigns/new'
-      preLoaderRoute: typeof AuthenticatedCampaignsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/prospects/': {
-      id: '/_authenticated/prospects/'
-      path: '/prospects'
-      fullPath: '/prospects/'
-      preLoaderRoute: typeof AuthenticatedProspectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/prospects/$prospectId': {
-      id: '/_authenticated/prospects/$prospectId'
-      path: '/prospects/$prospectId'
-      fullPath: '/prospects/$prospectId'
-      preLoaderRoute: typeof AuthenticatedProspectsProspectIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-const rootRouteChildren: RootRouteChildren = {
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedActivityRoute: AuthenticatedActivityRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
@@ -314,6 +352,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedProspectsProspectIdRoute: AuthenticatedProspectsProspectIdRoute,
   AuthenticatedCampaignsIndexRoute: AuthenticatedCampaignsIndexRoute,
   AuthenticatedProspectsIndexRoute: AuthenticatedProspectsIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
