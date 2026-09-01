@@ -219,15 +219,43 @@ export async function deleteRow(table: string, id: string): Promise<void> {
   if (error) throw error;
 }
 
-/** Default categories + a placeholder sending identity for a brand-new workspace. */
+/** The four working categories every new workspace starts with (no demo prospects). */
 export async function seedWorkspace(userId: string): Promise<void> {
-  await insertRows(
-    "categories",
-    [
-      { user_id: userId, name: "Schools", icon: "🎓", color: "chart-1", purposes: ["Partnership", "Service Offer"] },
-      { user_id: userId, name: "Hotels & Resorts", icon: "🏝️", color: "chart-2", purposes: ["Partnership", "Booking Deal"] },
-      { user_id: userId, name: "Corporate", icon: "🏢", color: "chart-3", purposes: ["Service Offer", "Sponsorship"] },
-      { user_id: userId, name: "Software Development", icon: "💻", color: "chart-4", purposes: ["Service Offer", "Collaboration"] },
-    ].map((c) => c),
-  );
+  await insertRows("categories", [
+    {
+      user_id: userId,
+      name: "Tour & Travel",
+      icon: "🦁",
+      color: "cat-1",
+      purposes: [
+        "Hotel/resort partnership",
+        "Hotel rate request",
+        "Tour operator partnership",
+        "Safari packages",
+        "Destination partnership",
+      ],
+    },
+    {
+      user_id: userId,
+      name: "Schools",
+      icon: "🎓",
+      color: "cat-2",
+      purposes: ["School trips", "Educational tours", "Student travel packages", "Software development"],
+    },
+    {
+      user_id: userId,
+      name: "Corporate / Brands",
+      icon: "🏢",
+      color: "cat-3",
+      purposes: ["Team retreats", "Employee trips", "Corporate travel", "Brand partnerships"],
+    },
+    {
+      user_id: userId,
+      name: "Software Development",
+      icon: "💻",
+      color: "cat-4",
+      purposes: ["Website development", "Web app development", "Maintenance retainer", "System integration"],
+    },
+  ]);
 }
+
