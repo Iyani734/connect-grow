@@ -1,5 +1,5 @@
-import { startGmailConnect } from "@/server/gmail";
-import { completeGmailConnection } from "@/server/gmail";
+import { startGmailConnect } from "@/lib/gmail.functions";
+import { completeGmailConnection } from "@/lib/gmail.functions";
 
 const CONNECTOR_ID = "google_mail";
 
