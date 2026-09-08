@@ -111,25 +111,24 @@ function SettingsPage() {
 
       <SectionCard
         title="Integrations"
-        description="Live sending and reply sync require a backend with OAuth credentials."
+        description="Your workspace data is stored securely in your account."
       >
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
-            The workspace currently runs in demo mode: data lives in this browser and campaign sends are simulated. To
-            send real email you need three things — a server-side database, OAuth apps for Gmail and Microsoft, and a
-            sending queue that respects each account's daily limit.
+            Prospects, campaigns and history are saved to your private workspace — nothing lives only in this browser.
+            Gmail can be connected from the Email Accounts page using Google sign-in; no password is ever stored.
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Google Cloud project with the Gmail API enabled and an OAuth consent screen</li>
-            <li>Microsoft Entra app registration with Mail.Send and Mail.Read permissions</li>
-            <li>Encrypted refresh-token storage server-side — passwords are never used</li>
-            <li>Background sync to pull replies, bounces and thread history back into the CRM</li>
+            <li>Gmail connects through Google's own consent screen</li>
+            <li>Access is stored encrypted and only for your account</li>
+            <li>Each sending address keeps its own daily limit</li>
+            <li>Outlook can be added next if you need a second provider</li>
           </ul>
-          <p>Ask in chat to enable the backend and I will wire this up.</p>
         </div>
       </SectionCard>
 
-      <SectionCard title="Danger zone" description="Restore the workspace to the original demo dataset.">
+      <SectionCard title="Danger zone" description="Clear this workspace and start again with the four base categories.">
+
         <Button
           variant="outline"
           className="text-destructive"
