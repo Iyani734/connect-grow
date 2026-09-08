@@ -4,6 +4,8 @@ import { CheckCircle2, Link2, Plug, RefreshCw, ShieldCheck, XCircle } from "luci
 import { toast } from "sonner";
 import { useOutreach } from "@/lib/outreach/store";
 import { relative } from "@/lib/outreach/format";
+import { connectGmail } from "@/lib/outreach/gmail-connect";
+import { getGmailStatus, disconnectGmail } from "@/lib/gmail.functions";
 import { CategoryChip, PageHeader, Pill, ProgressBar, SectionCard } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,65 @@ const PROVIDER_LABEL = { google: "Gmail / Google Workspace", microsoft: "Microso
 
 function AccountsPage() {
   const store = useOutreach();
+  const [busy, setBusy] = React.useState(false);
+  const [gmail, setGmail] = React.useState<{
+    connected: boolean;
+    reconnectRequired?: boolean;
+    address?: string;
+  } | null>(null);
+
+  const refreshGmail = React.useCallback(async () => {
+    try {
+      const status = await getGmailStatus();
+      setGmail(status);
+      return status;
+    } catch {
+      setGmail({ connected: false });
+      return null;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void refreshGmail();
+  }, [refreshGmail]);
+
+  const handleConnect = async () => {
+    setBusy(true);
+    try {
+      await connectGmail();
+      const status = await refreshGmail();
+      if (status?.connected && status.address) {
+        await store.addAccount({
+          label: status.address.split("@")[0] ?? "Gmail",
+          address: status.address,
+          provider: "google",
+          status: "connected",
+          categoryIds: [],
+          dailyLimit: 100,
+        });
+        toast.success("Gmail connected", { description: status.address });
+      } else {
+        toast.success("Google authorisation completed");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not connect Gmail");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setBusy(true);
+    try {
+      await disconnectGmail();
+      await refreshGmail();
+      toast.message("Gmail disconnected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not disconnect Gmail");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -32,19 +93,39 @@ function AccountsPage() {
         title="Email Accounts"
         description="Each campaign category sends from its own address. Connections use OAuth — no passwords are ever stored."
         actions={
-          <Button onClick={() => toast.message("OAuth not configured", { description: "Connect a provider in Settings → Integrations to enable live sending." })}>
-            <Plug className="size-4" /> Connect account
+          <Button onClick={handleConnect} disabled={busy}>
+            <Plug className="size-4" />{" "}
+            {gmail?.reconnectRequired ? "Reconnect Gmail" : gmail?.connected ? "Connect another" : "Connect Gmail"}
           </Button>
         }
       />
 
-      <div className="surface-card flex flex-wrap items-center gap-3 border-l-4 border-l-warning p-4 text-sm">
-        <ShieldCheck className="size-5 text-warning" />
-        <p className="text-muted-foreground">
-          <strong className="text-foreground">Demo mode.</strong> These accounts are sample data. Real sending and reply
-          sync require OAuth credentials for Google or Microsoft — see Settings → Integrations.
-        </p>
+      <div className="surface-card flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-warning p-4 text-sm">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="size-5 text-warning" />
+          {gmail?.connected ? (
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Gmail connected</strong> as {gmail.address}. Replies and sent
+              messages can be read for your campaigns.
+            </p>
+          ) : gmail?.reconnectRequired ? (
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Reconnect needed.</strong> Your Google access needs to be renewed.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">No mailbox connected yet.</strong> Connect Gmail to send campaigns
+              and read replies from your own address.
+            </p>
+          )}
+        </div>
+        {gmail?.connected ? (
+          <Button size="sm" variant="ghost" onClick={handleDisconnect} disabled={busy}>
+            Disconnect Gmail
+          </Button>
+        ) : null}
       </div>
+
 
       <div className="grid gap-5 lg:grid-cols-2">
         {store.accounts.map((a) => {
