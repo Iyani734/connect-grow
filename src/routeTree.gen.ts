@@ -24,6 +24,7 @@ import { Route as AuthenticatedCampaignsCampaignIdRouteImport } from './routes/_
 import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authenticated/campaigns.new'
 import { Route as AuthenticatedProspectsIndexRouteImport } from './routes/_authenticated/prospects.index'
 import { Route as AuthenticatedProspectsProspectIdRouteImport } from './routes/_authenticated/prospects.$prospectId'
+import { Route as OauthGoogleMailReturnRouteImport } from './routes/oauth/google-mail/return'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -104,6 +105,11 @@ const AuthenticatedProspectsProspectIdRoute =
     path: '/prospects/$prospectId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const OauthGoogleMailReturnRoute = OauthGoogleMailReturnRouteImport.update({
+  id: '/oauth/google-mail/return',
+  path: '/oauth/google-mail/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/prospects/$prospectId': typeof AuthenticatedProspectsProspectIdRoute
+  '/oauth/google-mail/return': typeof OauthGoogleMailReturnRoute
   '/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/prospects/': typeof AuthenticatedProspectsIndexRoute
 }
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/prospects/$prospectId': typeof AuthenticatedProspectsProspectIdRoute
+  '/oauth/google-mail/return': typeof OauthGoogleMailReturnRoute
   '/campaigns': typeof AuthenticatedCampaignsIndexRoute
   '/prospects': typeof AuthenticatedProspectsIndexRoute
 }
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/_authenticated/campaigns/$campaignId': typeof AuthenticatedCampaignsCampaignIdRoute
   '/_authenticated/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/_authenticated/prospects/$prospectId': typeof AuthenticatedProspectsProspectIdRoute
+  '/oauth/google-mail/return': typeof OauthGoogleMailReturnRoute
   '/_authenticated/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/_authenticated/prospects/': typeof AuthenticatedProspectsIndexRoute
 }
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/prospects/$prospectId'
+    | '/oauth/google-mail/return'
     | '/campaigns/'
     | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/campaigns/$campaignId'
     | '/campaigns/new'
     | '/prospects/$prospectId'
+    | '/oauth/google-mail/return'
     | '/campaigns'
     | '/prospects'
   id:
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campaigns/$campaignId'
     | '/_authenticated/campaigns/new'
     | '/_authenticated/prospects/$prospectId'
+    | '/oauth/google-mail/return'
     | '/_authenticated/campaigns/'
     | '/_authenticated/prospects/'
   fileRoutesById: FileRoutesById
@@ -210,6 +222,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  OauthGoogleMailReturnRoute: typeof OauthGoogleMailReturnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProspectsProspectIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/oauth/google-mail/return': {
+      id: '/oauth/google-mail/return'
+      path: '/oauth/google-mail/return'
+      fullPath: '/oauth/google-mail/return'
+      preLoaderRoute: typeof OauthGoogleMailReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -360,6 +380,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  OauthGoogleMailReturnRoute: OauthGoogleMailReturnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
