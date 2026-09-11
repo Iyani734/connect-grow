@@ -44,6 +44,7 @@ interface StoreValue extends WorkspaceState {
   updateCampaign: (id: ID, patch: Partial<Campaign>) => void;
   deleteCampaign: (id: ID) => void;
   sendBatch: (campaignId: ID, count?: number) => number;
+  addRecipients: (campaignId: ID, prospectIds: ID[]) => number;
   saveTemplate: (t: Omit<Template, "id" | "timesUsed" | "replyRate" | "won">) => void;
   deleteTemplate: (id: ID) => void;
   completeFollowUp: (id: ID) => void;
@@ -507,6 +508,49 @@ export function OutreachProvider({ children }: { children: React.ReactNode }) {
           }
         });
         return sent;
+      },
+
+      addRecipients(campaignId, prospectIds) {
+        const campaign = state.campaigns.find((c) => c.id === campaignId);
+        if (!campaign) return 0;
+        const existing = new Set(
+          state.recipients.filter((r) => r.campaignId === campaignId).map((r) => r.prospectId),
+        );
+        const fresh = prospectIds.filter((pid) => !existing.has(pid));
+        if (fresh.length === 0) return 0;
+        const rows = fresh.map<CampaignRecipient>((pid) => ({
+          id: uid(),
+          campaignId,
+          prospectId: pid,
+          state: "queued",
+          sentAt: null,
+          openedAt: null,
+          openCount: 0,
+          repliedAt: null,
+          followUpAt: null,
+          outcome: null,
+          subject: campaign.subject,
+          body: campaign.body,
+        }));
+        mutate((d) => {
+          d.recipients = [...rows, ...d.recipients];
+        });
+        if (userId)
+          persist(
+            insertRows(
+              "campaign_recipients",
+              rows.map((r) => ({
+                id: r.id,
+                user_id: uidOr,
+                campaign_id: campaignId,
+                prospect_id: r.prospectId,
+                state: "queued",
+                subject: r.subject ?? null,
+                body: r.body ?? null,
+              })),
+            ),
+          );
+        return rows.length;
       },
 
       saveTemplate(t) {

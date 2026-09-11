@@ -1,11 +1,13 @@
 import * as React from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Ban, Pause, Play, Send } from "lucide-react";
+import { ArrowLeft, Ban, Pause, Play, Send, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { campaignStats, useLookups, useOutreach } from "@/lib/outreach/store";
 import { formatDate, formatShort, pct } from "@/lib/outreach/format";
 import { CategoryChip, EmptyState, Pill, ProgressBar, SectionCard, StatusBadge } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
+import { useServerFn } from "@tanstack/react-start";
+import { sendCampaignBatch } from "@/lib/campaign-send.functions";
 
 export const Route = createFileRoute("/_authenticated/campaigns/$campaignId")({
   head: () => ({
@@ -23,7 +25,34 @@ function CampaignDetail() {
   const { campaignId } = useParams({ from: "/_authenticated/campaigns/$campaignId" });
   const store = useOutreach();
   const lookups = useLookups();
+  const sendBatchFn = useServerFn(sendCampaignBatch);
+  const [sending, setSending] = React.useState(false);
+  const [picking, setPicking] = React.useState(false);
+  const [picked, setPicked] = React.useState<string[]>([]);
   const campaign = store.campaigns.find((c) => c.id === campaignId);
+
+  const send = async () => {
+    if (!campaign) return;
+    setSending(true);
+    try {
+      const res = await sendBatchFn({ data: { campaignId: campaign.id } });
+      if (res.needsConnection) {
+        toast.error("Connect a Gmail account first", { description: "Go to Email Accounts and connect Gmail." });
+      } else if (res.reconnectRequired) {
+        toast.error("Gmail access expired", { description: "Reconnect Gmail on the Email Accounts page." });
+      } else if (res.sent === 0 && res.failed === 0) {
+        toast.message("Nothing to send", { description: "No one is queued in this campaign yet." });
+      } else {
+        if (res.sent > 0) toast.success(`${res.sent} email${res.sent === 1 ? "" : "s"} sent`);
+        if (res.failed > 0) toast.error(`${res.failed} failed`, { description: res.errors[0] ?? "" });
+      }
+      await store.refresh();
+    } catch (err) {
+      toast.error("Sending failed", { description: err instanceof Error ? err.message : "Please try again." });
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (!campaign) {
     return (
@@ -41,6 +70,13 @@ function CampaignDetail() {
   const stats = campaignStats(campaign.id, store.recipients, store.prospects);
   const rows = store.recipients.filter((r) => r.campaignId === campaign.id);
   const account = lookups.account(campaign.emailAccountId);
+  const inCampaign = new Set(rows.map((r) => r.prospectId));
+  const eligible = store.prospects.filter(
+    (p) =>
+      !inCampaign.has(p.id) &&
+      (!campaign.categoryId || p.categoryId === campaign.categoryId) &&
+      p.status !== "do_not_contact",
+  );
 
   return (
     <div className="space-y-6">
@@ -58,13 +94,18 @@ function CampaignDetail() {
               </Pill>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {campaign.purpose} · {account?.label} ({account?.address}) · created {formatDate(campaign.createdAt)}
+              {campaign.purpose}
+              {account ? ` · ${account.label} (${account.address})` : " · no sending account linked"} · created{" "}
+              {formatDate(campaign.createdAt)}
             </p>
             <div className="mt-3">
               <CategoryChip category={lookups.category(campaign.categoryId)} />
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => { setPicked([]); setPicking((v) => !v); }}>
+              <UserPlus className="size-4" /> Add recipients
+            </Button>
             {campaign.status === "sending" ? (
               <Button variant="outline" onClick={() => { store.updateCampaign(campaign.id, { status: "paused" }); toast.message("Campaign paused"); }}>
                 <Pause className="size-4" /> Pause
@@ -74,15 +115,8 @@ function CampaignDetail() {
                 <Play className="size-4" /> Resume
               </Button>
             ) : null}
-            <Button
-              variant="outline"
-              disabled={stats.sent >= stats.recipients}
-              onClick={() => {
-                const n = store.sendBatch(campaign.id);
-                toast.success(`${n} emails sent`);
-              }}
-            >
-              <Send className="size-4" /> Send next batch
+            <Button variant="outline" disabled={sending || stats.sent >= stats.recipients} onClick={() => void send()}>
+              <Send className="size-4" /> {sending ? "Sending…" : "Send next batch"}
             </Button>
             <Button
               variant="outline"
@@ -92,6 +126,51 @@ function CampaignDetail() {
             </Button>
           </div>
         </div>
+
+        {picking ? (
+          <div className="mt-5 rounded-lg border border-border p-4">
+            <p className="text-sm font-medium text-foreground">
+              Prospects in this category, not yet in the campaign
+            </p>
+            {eligible.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                No matching prospects. Add prospects in this campaign's category first.
+              </p>
+            ) : (
+              <>
+                <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
+                  {eligible.map((p) => (
+                    <label key={p.id} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-muted/60">
+                      <input
+                        type="checkbox"
+                        checked={picked.includes(p.id)}
+                        onChange={(e) =>
+                          setPicked((prev) => (e.target.checked ? [...prev, p.id] : prev.filter((x) => x !== p.id)))
+                        }
+                      />
+                      <span className="font-medium text-foreground">{p.company}</span>
+                      <span className="text-muted-foreground">{p.contactName} · {p.email}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    disabled={picked.length === 0}
+                    onClick={() => {
+                      const n = store.addRecipients(campaign.id, picked);
+                      toast.success(`${n} recipient${n === 1 ? "" : "s"} added`);
+                      setPicked([]);
+                      setPicking(false);
+                    }}
+                  >
+                    Add {picked.length || ""} to campaign
+                  </Button>
+                  <Button variant="ghost" onClick={() => setPicking(false)}>Cancel</Button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : null}
 
         <div className="mt-6">
           <div className="mb-1.5 flex justify-between text-sm">
