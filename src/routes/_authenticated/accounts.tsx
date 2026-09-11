@@ -32,6 +32,7 @@ function AccountsPage() {
     connected: boolean;
     reconnectRequired?: boolean;
     address?: string;
+    problem?: string;
   } | null>(null);
 
   const refreshGmail = React.useCallback(async () => {
@@ -103,7 +104,12 @@ function AccountsPage() {
       <div className="surface-card flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-warning p-4 text-sm">
         <div className="flex items-center gap-3">
           <ShieldCheck className="size-5 text-warning" />
-          {gmail?.connected ? (
+          {gmail?.connected && gmail.problem ? (
+            <p className="text-muted-foreground">
+              <strong className="text-foreground">Google account authorised, but mail access is blocked.</strong>{" "}
+              {gmail.problem}
+            </p>
+          ) : gmail?.connected ? (
             <p className="text-muted-foreground">
               <strong className="text-foreground">Gmail connected</strong> as {gmail.address}. Replies and sent
               messages can be read for your campaigns.

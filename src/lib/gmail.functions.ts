@@ -71,6 +71,23 @@ export interface GmailStatus {
   reconnectRequired?: boolean;
   address?: string;
   messagesTotal?: number;
+  /** Authorised, but Google refused the read — e.g. the Gmail API is off for the OAuth project. */
+  problem?: string;
+}
+
+function friendlyGoogleError(status: number, raw: string): string {
+  let message = raw;
+  try {
+    const parsed = JSON.parse(raw) as { error?: { message?: string } };
+    if (parsed.error?.message) message = parsed.error.message;
+  } catch {
+    /* keep raw text */
+  }
+  if (/has not been used in project|is disabled/i.test(message)) {
+    return "Google has not switched on Gmail access for your Google Cloud project yet. Enable the Gmail API there, wait a minute, then refresh this page.";
+  }
+  if (status === 403) return `Google refused access: ${message}`;
+  return `Google returned an error (${status}): ${message}`;
 }
 
 export const getGmailStatus = createServerFn({ method: "GET" })
@@ -89,8 +106,9 @@ export const getGmailStatus = createServerFn({ method: "GET" })
 
     if (await appUserReconnectRequired(res)) return { connected: false, reconnectRequired: true };
     if (!res.ok) {
-      console.error(`Gmail profile lookup failed: ${res.status} ${await res.text()}`);
-      throw new Error("Could not read the connected Gmail account.");
+      const raw = await res.text();
+      console.error(`Gmail profile lookup failed: ${res.status} ${raw}`);
+      return { connected: true, problem: friendlyGoogleError(res.status, raw) };
     }
 
     const profile = (await res.json()) as { emailAddress?: string; messagesTotal?: number };
