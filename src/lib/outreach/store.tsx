@@ -44,6 +44,7 @@ interface StoreValue extends WorkspaceState {
   updateCampaign: (id: ID, patch: Partial<Campaign>) => void;
   deleteCampaign: (id: ID) => void;
   sendBatch: (campaignId: ID, count?: number) => number;
+  addRecipients: (campaignId: ID, prospectIds: ID[]) => number;
   saveTemplate: (t: Omit<Template, "id" | "timesUsed" | "replyRate" | "won">) => void;
   deleteTemplate: (id: ID) => void;
   completeFollowUp: (id: ID) => void;
