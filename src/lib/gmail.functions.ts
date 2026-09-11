@@ -106,8 +106,9 @@ export const getGmailStatus = createServerFn({ method: "GET" })
 
     if (await appUserReconnectRequired(res)) return { connected: false, reconnectRequired: true };
     if (!res.ok) {
-      console.error(`Gmail profile lookup failed: ${res.status} ${await res.text()}`);
-      throw new Error("Could not read the connected Gmail account.");
+      const raw = await res.text();
+      console.error(`Gmail profile lookup failed: ${res.status} ${raw}`);
+      return { connected: true, problem: friendlyGoogleError(res.status, raw) };
     }
 
     const profile = (await res.json()) as { emailAddress?: string; messagesTotal?: number };
