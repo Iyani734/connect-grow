@@ -32,6 +32,7 @@ function AccountsPage() {
     connected: boolean;
     reconnectRequired?: boolean;
     address?: string;
+    problem?: string;
   } | null>(null);
 
   const refreshGmail = React.useCallback(async () => {
