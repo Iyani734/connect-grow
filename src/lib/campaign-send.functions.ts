@@ -37,6 +37,8 @@ export interface SendBatchResult {
   reconnectRequired?: boolean;
 }
 
+type SendOutcome = { ok: true; messageId?: string | null; threadId?: string | null } | { ok: false; error: string };
+
 export const sendCampaignBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { campaignId: string; limit?: number }) => {
@@ -47,9 +49,6 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const empty: SendBatchResult = { sent: 0, failed: 0, remaining: 0, errors: [] };
 
-    const connectionAPIKey = await getConnectionKeyForUser(userId, GMAIL_CONNECTOR_ID);
-    if (!connectionAPIKey) return { ...empty, needsConnection: true };
-
     const { data: campaign, error: cErr } = await supabase
       .from("campaigns")
       .select("*")
@@ -57,6 +56,31 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       .maybeSingle();
     if (cErr) throw cErr;
     if (!campaign) throw new Error("Campaign not found");
+
+    // ---- Work out which mailbox this campaign sends from -------------------
+    let account: { id: string; address: string; provider: string } | null = null;
+    if (campaign.email_account_id) {
+      const { data: acct } = await supabase
+        .from("email_accounts")
+        .select("id, address, provider")
+        .eq("id", campaign.email_account_id)
+        .maybeSingle();
+      account = acct ?? null;
+    }
+    if (!account) {
+      const { data: accts } = await supabase
+        .from("email_accounts")
+        .select("id, address, provider")
+        .eq("user_id", userId)
+        .eq("status", "connected")
+        .order("created_at", { ascending: true });
+      account = accts?.[0] ?? null;
+    }
+
+    const { getSmtpConfig } = await import("@/server/smtpAccounts.server");
+    const smtpConfig = account?.provider === "smtp" ? await getSmtpConfig(userId, account.address) : null;
+    const connectionAPIKey = smtpConfig ? null : await getConnectionKeyForUser(userId, GMAIL_CONNECTOR_ID);
+    if (!smtpConfig && !connectionAPIKey) return { ...empty, needsConnection: true };
 
     const limit = Math.max(1, Math.min(data.limit ?? campaign.batch_size ?? 20, 50));
 
@@ -82,17 +106,8 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       .maybeSingle();
     const senderName = profile?.display_name ?? "";
 
-    // Sender address: the campaign's mailbox when set, otherwise the Gmail profile.
-    let fromAddress = "";
-    if (campaign.email_account_id) {
-      const { data: acct } = await supabase
-        .from("email_accounts")
-        .select("address")
-        .eq("id", campaign.email_account_id)
-        .maybeSingle();
-      fromAddress = acct?.address ?? "";
-    }
-    if (!fromAddress) {
+    let fromAddress = account?.address ?? "";
+    if (!fromAddress && connectionAPIKey) {
       const profRes = await callAsAppUser({
         gatewayBaseUrl: GATEWAY_BASE_URL,
         connectionAPIKey,
@@ -106,6 +121,57 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       }
     }
     const from = senderName && fromAddress ? `${header(senderName)} <${fromAddress}>` : fromAddress;
+
+    // ---- Transport ---------------------------------------------------------
+    let reconnect = false;
+    let smtpSession: { send: (m: { from: string; fromName?: string | undefined; to: string; subject: string; text: string }) => Promise<void>; quit: () => Promise<void> } | null = null;
+
+    if (smtpConfig) {
+      const { openSmtpSession } = await import("@/server/smtpClient.server");
+      try {
+        smtpSession = await openSmtpSession(smtpConfig);
+      } catch (err) {
+        return {
+          ...empty,
+          failed: 0,
+          errors: [err instanceof Error ? err.message : "Could not reach the mail server"],
+        };
+      }
+    }
+
+    const sendOne = async (to: string, subject: string, body: string): Promise<SendOutcome> => {
+      if (smtpSession) {
+        try {
+          await smtpSession.send({ from: fromAddress, fromName: senderName || undefined, to, subject, text: body });
+          return { ok: true };
+        } catch (err) {
+          return { ok: false, error: err instanceof Error ? err.message : "Send failed" };
+        }
+      }
+      const res = await callAsAppUser({
+        gatewayBaseUrl: GATEWAY_BASE_URL,
+        connectionAPIKey: connectionAPIKey!,
+        connectorId: GMAIL_CONNECTOR_ID,
+        path: "/gmail/v1/users/me/messages/send",
+        requiredScopes: SEND_SCOPES,
+        init: {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ raw: rawEmail({ to, from, subject, body }) }),
+        },
+      });
+      if (await appUserReconnectRequired(res)) {
+        reconnect = true;
+        return { ok: false, error: "Reconnect required" };
+      }
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`Gmail send failed [${res.status}]: ${text}`);
+        return { ok: false, error: `${res.status} ${text.slice(0, 200)}` };
+      }
+      const msg = (await res.json()) as { id?: string; threadId?: string };
+      return { ok: true, messageId: msg.id ?? null, threadId: msg.threadId ?? null };
+    };
 
     let sent = 0;
     const errors: string[] = [];
@@ -134,35 +200,21 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       const subject = fill(recipient.subject || campaign.subject, vars);
       const body = fill(recipient.body || campaign.body, vars);
 
-      const res = await callAsAppUser({
-        gatewayBaseUrl: GATEWAY_BASE_URL,
-        connectionAPIKey,
-        connectorId: GMAIL_CONNECTOR_ID,
-        path: "/gmail/v1/users/me/messages/send",
-        requiredScopes: SEND_SCOPES,
-        init: {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ raw: rawEmail({ to: prospect.email, from, subject, body }) }),
-        },
-      });
+      const outcome = await sendOne(prospect.email, subject, body);
 
-      if (await appUserReconnectRequired(res)) {
+      if (!outcome.ok && reconnect) {
         return { sent, failed: errors.length, remaining: 0, errors, reconnectRequired: true };
       }
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error(`Gmail send failed [${res.status}]: ${text}`);
-        errors.push(`${prospect.email}: ${res.status} ${text.slice(0, 200)}`);
+      if (!outcome.ok) {
+        errors.push(`${prospect.email}: ${outcome.error}`);
         await supabase
           .from("campaign_recipients")
-          .update({ state: "bounced", error_message: text.slice(0, 500) })
+          .update({ state: "bounced", error_message: outcome.error.slice(0, 500) })
           .eq("id", recipient.id);
         continue;
       }
 
-      const msg = (await res.json()) as { id?: string; threadId?: string };
       await supabase
         .from("campaign_recipients")
         .update({
@@ -170,8 +222,8 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
           sent_at: nowIso,
           subject,
           body,
-          provider_message_id: msg.id ?? null,
-          provider_thread_id: msg.threadId ?? null,
+          provider_message_id: outcome.messageId ?? null,
+          provider_thread_id: outcome.threadId ?? null,
           error_message: null,
         })
         .eq("id", recipient.id);
@@ -198,6 +250,8 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       sent += 1;
     }
 
+    if (smtpSession) await smtpSession.quit();
+
     const { count } = await supabase
       .from("campaign_recipients")
       .select("id", { count: "exact", head: true })
@@ -209,6 +263,13 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
       .from("campaigns")
       .update({ status: remaining === 0 ? "completed" : "sending" })
       .eq("id", campaign.id);
+
+    if (account) {
+      await supabase
+        .from("email_accounts")
+        .update({ sent_today: sent, last_sync_at: nowIso })
+        .eq("id", account.id);
+    }
 
     return { sent, failed: errors.length, remaining, errors };
   });
