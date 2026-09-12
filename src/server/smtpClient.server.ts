@@ -155,7 +155,10 @@ function wrapCfSocket(socket: any): Conn {
       await writer.write(encoder.encode(s));
     },
     async read() {
-      const { value, done } = await withTimeout(reader.read(), "waiting for the mail server");
+      const { value, done } = (await withTimeout(
+        reader.read() as Promise<{ value?: Uint8Array; done: boolean }>,
+        "waiting for the mail server",
+      )) as { value?: Uint8Array; done: boolean };
       if (done || !value) return "";
       return decoder.decode(value as Uint8Array);
     },
