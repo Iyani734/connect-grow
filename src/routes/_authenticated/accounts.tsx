@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Link2, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { CheckCircle2, Link2, Mail, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useOutreach } from "@/lib/outreach/store";
 import { relative } from "@/lib/outreach/format";
