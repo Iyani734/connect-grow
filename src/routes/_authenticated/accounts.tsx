@@ -222,8 +222,17 @@ function AccountsPage() {
             </p>
           ) : (
             <p className="text-muted-foreground">
-              <strong className="text-foreground">No mailbox connected yet.</strong> Connect Gmail to send campaigns
-              and read replies from your own address.
+              {store.accounts.some((a) => a.status === "connected") ? (
+                <>
+                  <strong className="text-foreground">Sending is ready.</strong> Campaigns will go out from your
+                  connected mailbox below. Connect Gmail as well if you also want replies read automatically.
+                </>
+              ) : (
+                <>
+                  <strong className="text-foreground">No mailbox connected yet.</strong> Connect Gmail, or use “Add
+                  other email” for an address like info@yourdomain.com from your hosting provider.
+                </>
+              )}
             </p>
           )}
         </div>
