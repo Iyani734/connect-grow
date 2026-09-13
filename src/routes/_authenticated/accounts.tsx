@@ -295,7 +295,17 @@ function AccountsPage() {
                 <Button
                   size="sm"
                   variant={a.status === "connected" ? "ghost" : "default"}
+                  disabled={busy}
                   onClick={() => {
+                    if (a.provider === "smtp" && a.status === "connected") {
+                      void handleSmtpDisconnect(a.address);
+                      return;
+                    }
+                    if (a.provider === "smtp") {
+                      setSmtp((s) => ({ ...s, address: a.address, label: a.label }));
+                      setShowSmtp(true);
+                      return;
+                    }
                     store.toggleAccount(a.id);
                     toast.message(a.status === "connected" ? "Account disconnected" : "Account connected");
                   }}
