@@ -89,18 +89,118 @@ function AccountsPage() {
     }
   };
 
+  const saveSmtp = useServerFn(connectSmtpAccount);
+  const removeSmtp = useServerFn(disconnectSmtpAccount);
+  const [showSmtp, setShowSmtp] = React.useState(false);
+  const [smtp, setSmtp] = React.useState({
+    label: "",
+    address: "",
+    host: "",
+    port: "465",
+    username: "",
+    password: "",
+  });
+  const setSmtpField = (k: keyof typeof smtp) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setSmtp((s) => ({ ...s, [k]: e.target.value }));
+
+  const handleSmtpConnect = async () => {
+    setBusy(true);
+    try {
+      const port = Number(smtp.port) || 465;
+      await saveSmtp({
+        data: {
+          label: smtp.label || smtp.address.split("@")[0] || "Mailbox",
+          address: smtp.address.trim(),
+          host: smtp.host.trim(),
+          port,
+          secure: port === 465,
+          username: (smtp.username || smtp.address).trim(),
+          password: smtp.password,
+        },
+      });
+      await store.refresh();
+      setSmtp((s) => ({ ...s, password: "" }));
+      setShowSmtp(false);
+      toast.success("Mailbox connected", { description: smtp.address });
+    } catch (err) {
+      toast.error("Could not connect that mailbox", {
+        description: err instanceof Error ? err.message : "Check the server address, username and password.",
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSmtpDisconnect = async (address: string) => {
+    setBusy(true);
+    try {
+      await removeSmtp({ data: { address } });
+      await store.refresh();
+      toast.message("Mailbox disconnected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not disconnect that mailbox");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Email Accounts"
-        description="Each campaign category sends from its own address. Connections use OAuth — no passwords are ever stored."
+        description="Send from Gmail, or from any mailbox you own — including an info@ address from your hosting provider."
         actions={
-          <Button onClick={handleConnect} disabled={busy}>
-            <Plug className="size-4" />{" "}
-            {gmail?.reconnectRequired ? "Reconnect Gmail" : gmail?.connected ? "Connect another" : "Connect Gmail"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setShowSmtp((v) => !v)} disabled={busy}>
+              <Mail className="size-4" /> Add other email
+            </Button>
+            <Button onClick={handleConnect} disabled={busy}>
+              <Plug className="size-4" />{" "}
+              {gmail?.reconnectRequired ? "Reconnect Gmail" : gmail?.connected ? "Connect another" : "Connect Gmail"}
+            </Button>
+          </div>
         }
       />
+
+      {showSmtp ? (
+        <SectionCard
+          title="Connect another email address"
+          description="For mailboxes from your hosting provider (Truehost, cPanel, Zoho and similar). Your password is stored encrypted and only used to send your campaigns."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Email address">
+              <Input placeholder="info@yourdomain.com" value={smtp.address} onChange={setSmtpField("address")} />
+            </Field>
+            <Field label="Display name for this mailbox">
+              <Input placeholder="Sales inbox" value={smtp.label} onChange={setSmtpField("label")} />
+            </Field>
+            <Field label="Outgoing server (SMTP)">
+              <Input placeholder="mail.yourdomain.com" value={smtp.host} onChange={setSmtpField("host")} />
+            </Field>
+            <Field label="Port">
+              <Input placeholder="465" value={smtp.port} onChange={setSmtpField("port")} />
+            </Field>
+            <Field label="Username (usually the full address)">
+              <Input placeholder="info@yourdomain.com" value={smtp.username} onChange={setSmtpField("username")} />
+            </Field>
+            <Field label="Password">
+              <Input type="password" value={smtp.password} onChange={setSmtpField("password")} />
+            </Field>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            In Truehost cPanel open <strong>Email Accounts → Connect Devices</strong> to see your exact server name.
+            Use port 465 for a secure connection, or 587 if your provider recommends it.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <Button onClick={handleSmtpConnect} disabled={busy}>
+              {busy ? "Checking…" : "Connect mailbox"}
+            </Button>
+            <Button variant="ghost" onClick={() => setShowSmtp(false)} disabled={busy}>
+              Cancel
+            </Button>
+          </div>
+        </SectionCard>
+      ) : null}
 
       <div className="surface-card flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-warning p-4 text-sm">
         <div className="flex items-center gap-3">
