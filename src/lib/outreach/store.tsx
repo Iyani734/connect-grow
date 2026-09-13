@@ -575,7 +575,7 @@ export function OutreachProvider({ children }: { children: React.ReactNode }) {
           );
           const p = d.prospects.find((x) => x.id === r.prospectId);
           const c = d.campaigns.find((x) => x.id === r.campaignId);
-          logActivity(d, "reply_received", `${p?.company ?? "Prospect"} replied`, {
+          logActivity(d, "email_replied", `${p?.company ?? "Prospect"} replied`, {
             prospectId: r.prospectId,
             campaignId: r.campaignId,
             categoryId: c?.categoryId,
