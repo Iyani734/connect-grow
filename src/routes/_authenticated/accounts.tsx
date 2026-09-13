@@ -6,6 +6,7 @@ import { useOutreach } from "@/lib/outreach/store";
 import { relative } from "@/lib/outreach/format";
 import { connectGmail } from "@/lib/outreach/gmail-connect";
 import { getGmailStatus, disconnectGmail } from "@/lib/gmail.functions";
+import { connectSmtpAccount, disconnectSmtpAccount } from "@/lib/smtp.functions";
 import { CategoryChip, PageHeader, Pill, ProgressBar, SectionCard } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
