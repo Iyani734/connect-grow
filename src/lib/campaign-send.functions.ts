@@ -273,3 +273,92 @@ export const sendCampaignBatch = createServerFn({ method: "POST" })
 
     return { sent, failed: errors.length, remaining, errors };
   });
+
+export interface ReplySyncResult {
+  checked: number;
+  replies: number;
+  unsupported?: boolean;
+  reconnectRequired?: boolean;
+}
+
+/** Looks at each sent Gmail thread and marks recipients who wrote back. */
+export const syncCampaignReplies = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { campaignId: string }) => {
+    if (!input?.campaignId) throw new Error("Missing campaignId");
+    return { campaignId: input.campaignId };
+  })
+  .handler(async ({ data, context }): Promise<ReplySyncResult> => {
+    const { supabase, userId } = context;
+    const connectionAPIKey = await getConnectionKeyForUser(userId, GMAIL_CONNECTOR_ID);
+    if (!connectionAPIKey) return { checked: 0, replies: 0, unsupported: true };
+
+    const { data: rows } = await supabase
+      .from("campaign_recipients")
+      .select("id, prospect_id, provider_thread_id, replied_at")
+      .eq("campaign_id", data.campaignId)
+      .not("provider_thread_id", "is", null)
+      .is("replied_at", null);
+    if (!rows || rows.length === 0) return { checked: 0, replies: 0 };
+
+    const profRes = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey,
+      connectorId: GMAIL_CONNECTOR_ID,
+      path: "/gmail/v1/users/me/profile",
+    });
+    if (await appUserReconnectRequired(profRes)) return { checked: 0, replies: 0, reconnectRequired: true };
+    const me = profRes.ok ? (((await profRes.json()) as { emailAddress?: string }).emailAddress ?? "") : "";
+
+    let replies = 0;
+    for (const row of rows) {
+      const res = await callAsAppUser({
+        gatewayBaseUrl: GATEWAY_BASE_URL,
+        connectionAPIKey,
+        connectorId: GMAIL_CONNECTOR_ID,
+        path: `/gmail/v1/users/me/threads/${row.provider_thread_id}?format=metadata&metadataHeaders=From&metadataHeaders=Date`,
+      });
+      if (await appUserReconnectRequired(res)) return { checked: rows.length, replies, reconnectRequired: true };
+      if (!res.ok) continue;
+      const thread = (await res.json()) as {
+        messages?: Array<{ internalDate?: string; payload?: { headers?: Array<{ name: string; value: string }> } }>;
+      };
+      const inbound = (thread.messages ?? []).find((m) => {
+        const from = m.payload?.headers?.find((h) => h.name.toLowerCase() === "from")?.value ?? "";
+        return me ? !from.toLowerCase().includes(me.toLowerCase()) : false;
+      });
+      if (!inbound) continue;
+      const at = inbound.internalDate
+        ? new Date(Number(inbound.internalDate)).toISOString()
+        : new Date().toISOString();
+      await supabase
+        .from("campaign_recipients")
+        .update({ state: "replied", replied_at: at })
+        .eq("id", row.id);
+      const { data: prospect } = await supabase
+        .from("prospects")
+        .select("id, company, status, category_id")
+        .eq("id", row.prospect_id)
+        .maybeSingle();
+      if (prospect) {
+        await supabase
+          .from("prospects")
+          .update({
+            last_response_at: at,
+            status: ["new", "contacted", "opened"].includes(prospect.status) ? "replied" : prospect.status,
+          })
+          .eq("id", prospect.id);
+        await supabase.from("activities").insert({
+          user_id: userId,
+          type: "email_replied",
+          title: `${prospect.company} replied`,
+          prospect_id: prospect.id,
+          campaign_id: data.campaignId,
+          category_id: prospect.category_id,
+          at,
+        });
+      }
+      replies += 1;
+    }
+    return { checked: rows.length, replies };
+  });

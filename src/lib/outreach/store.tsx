@@ -45,6 +45,7 @@ interface StoreValue extends WorkspaceState {
   deleteCampaign: (id: ID) => void;
   sendBatch: (campaignId: ID, count?: number) => number;
   addRecipients: (campaignId: ID, prospectIds: ID[]) => number;
+  markReplied: (recipientId: ID) => void;
   saveTemplate: (t: Omit<Template, "id" | "timesUsed" | "replyRate" | "won">) => void;
   deleteTemplate: (id: ID) => void;
   completeFollowUp: (id: ID) => void;
@@ -551,6 +552,48 @@ export function OutreachProvider({ children }: { children: React.ReactNode }) {
             ),
           );
         return rows.length;
+      },
+
+      markReplied(recipientId) {
+        const now = new Date().toISOString();
+        let prospectId: ID | null = null;
+        mutate((d) => {
+          const r = d.recipients.find((x) => x.id === recipientId);
+          if (!r || r.repliedAt) return;
+          prospectId = r.prospectId;
+          d.recipients = d.recipients.map((x) =>
+            x.id === recipientId ? { ...x, state: "replied", repliedAt: now } : x,
+          );
+          d.prospects = d.prospects.map((p) =>
+            p.id === r.prospectId
+              ? {
+                  ...p,
+                  lastResponseAt: now,
+                  status: ["new", "contacted", "opened"].includes(p.status) ? "replied" : p.status,
+                }
+              : p,
+          );
+          const p = d.prospects.find((x) => x.id === r.prospectId);
+          const c = d.campaigns.find((x) => x.id === r.campaignId);
+          logActivity(d, "email_replied", `${p?.company ?? "Prospect"} replied`, {
+            prospectId: r.prospectId,
+            campaignId: r.campaignId,
+            categoryId: c?.categoryId,
+          });
+        });
+        if (userId && prospectId) {
+          const pid: string = prospectId;
+          const status = state.prospects.find((p) => p.id === pid)?.status;
+          persist(
+            (async () => {
+              await updateRow("campaign_recipients", recipientId, { state: "replied", replied_at: now });
+              await updateRow("prospects", pid, {
+                last_response_at: now,
+                ...(status && ["new", "contacted", "opened"].includes(status) ? { status: "replied" } : {}),
+              });
+            })(),
+          );
+        }
       },
 
       saveTemplate(t) {
